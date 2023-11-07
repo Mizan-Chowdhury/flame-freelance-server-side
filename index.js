@@ -24,12 +24,11 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const addNewJob = client.db("flameFrelanceDB").collection("addJob");
-    // const cartCollection = client.db("").collection("");
+    const addBiddedJob = client.db("flameFrelanceDB").collection("biddedJob");
     // await client.connect();
     // await client.db("admin").command({ ping: 1 });
     app.post("/addJob", async (req, res) => {
-      // const newJob = req.body;
-      console.log(newJob);
+      const newJob = req.body;
       const result = await addNewJob.insertOne(newJob);
       res.send(result);
     });
@@ -49,6 +48,21 @@ async function run() {
       const result = await addNewJob.findOne(query);
       res.send(result);
     });
+
+    app.get("/postedJobs/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { email : email };
+      const result = await addNewJob.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post('/biddedJob', async(req,res)=>{
+      const biddedJob = req.body;
+      console.log(biddedJob);
+      const result = await addBiddedJob.insertOne(biddedJob);
+      res.send(result);
+    })
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
