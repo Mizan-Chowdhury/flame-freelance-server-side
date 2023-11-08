@@ -93,6 +93,15 @@ async function run() {
       res.send(result);
     });
 
+    app.delete('/postedJobs/:id', async(req,res)=>{
+      const id = req.params.id
+      const query = {
+        _id : new ObjectId(id),
+      }
+      const result = await addNewJob.deleteOne(query)
+      res.send(result);
+    })
+
     app.post("/biddedJob", async (req, res) => {
       const biddedJob = req.body;
       console.log(biddedJob);
@@ -100,7 +109,19 @@ async function run() {
       res.send(result);
     });
 
-    app.put("/biddedJob/:id");
+    app.get("/biddedJob/:email",async (req, res)=>{
+      const email = req.params.email
+      const query = {userEmail : email}
+      const result = await addBiddedJob.find(query).toArray();
+      res.send(result);
+    })
+
+    app.get("/biddJobRequests/:email",async (req, res)=>{
+      const email = req.params.email
+      const query = {employerEmail : email}
+      const result = await addBiddedJob.find(query).toArray();
+      res.send(result);
+    })
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
