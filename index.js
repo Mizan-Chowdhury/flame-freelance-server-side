@@ -44,7 +44,7 @@ async function run() {
     app.get("/jobDetails/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
-      const query = { _id : new ObjectId(id) };
+      const query = { _id: new ObjectId(id) };
       const result = await addNewJob.findOne(query);
       res.send(result);
     });
@@ -52,17 +52,55 @@ async function run() {
     app.get("/postedJobs/:email", async (req, res) => {
       const email = req.params.email;
       console.log(email);
-      const query = { email : email };
+      const query = { email: email };
       const result = await addNewJob.find(query).toArray();
       res.send(result);
     });
 
-    app.post('/biddedJob', async(req,res)=>{
+    app.get("/updatePostedJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await addNewJob.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/updatePostedJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedJob = req.body;
+      const email = req.body.email;
+      console.log(updatedJob, id);
+      const filter = { 
+        _id: new ObjectId(id),
+        email: email
+      };
+      const option = { upsert: true };
+      const updatedProduct = {
+        $set: {
+          title: updatedJob.title,
+          deadline: updatedJob.deadline,
+          category: updatedJob.category,
+          min_price: updatedJob.min_price,
+          max_price: updatedJob.max_price,
+          description: updatedJob.description
+        },
+      };
+      const result = await addNewJob.updateOne(
+        filter,
+        updatedProduct,
+        option
+      );
+      res.send(result);
+    });
+
+    app.post("/biddedJob", async (req, res) => {
       const biddedJob = req.body;
       console.log(biddedJob);
       const result = await addBiddedJob.insertOne(biddedJob);
       res.send(result);
-    })
+    });
+
+    app.put("/biddedJob/:id");
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
