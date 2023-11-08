@@ -93,18 +93,19 @@ async function run() {
       res.send(result);
     });
 
-    app.delete('/postedJobs/:id', async(req,res)=>{
+    app.patch('/postedJobs/:id', async(req,res)=>{
       const id = req.params.id;
-      const status = req.body.status;
+      const status = req.body;
+      console.log(id, status.status);
       const query = {
         _id : new ObjectId(id),
       }
       const updataStatus = {
         $set:{
-          status : status
+          status : status.status
         }
       }
-      const result = await addBiddedJob.deleteOne(query, updataStatus)
+      const result = await addBiddedJob.updateOne(query, updataStatus)
       res.send(result);
     })
 
