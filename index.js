@@ -1,14 +1,33 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParsar = require("cookie-parser");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-
 const port = process.env.PORT || 5000;
-
 const app = express();
 
+app.use(cors({
+  origin: ['http://localhost:5173'
+],
+  credentials:true
+}));
 app.use(express.json());
-app.use(cors());
+app.use(cookieParsar());
+
+const verifyToken = (req,res,next)=>{
+  const token = req.cookies.token;
+  if(!token){
+    return res.status(401).send({error: 'unAuthorized'})
+  }
+  jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded)=>{
+    if(err){
+      return res.status(401).send({error: 'unAuthorized'})
+    }
+    req.user = decoded
+    next();
+  })
+}
 
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@cluster0.qzinma9.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -27,6 +46,24 @@ async function run() {
     const addBiddedJob = client.db("flameFrelanceDB").collection("biddedJob");
     // await client.connect();
     // await client.db("admin").command({ ping: 1 });
+
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const token = jwt.sign(user, process.env.SECRET_TOKEN, {
+        expiresIn: "20h",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+        })
+        .send({success : true});
+    });
+
+
+
+
     app.post("/addJob", async (req, res) => {
       const newJob = req.body;
       const result = await addNewJob.insertOne(newJob);
@@ -92,6 +129,18 @@ async function run() {
       );
       res.send(result);
     });
+
+    app.delete('/deleted/:id', async(req, res)=>{
+      const id = req.params.id
+      console.log(id);
+      const query = { _id : new ObjectId(id)}
+      const result = await addNewJob.deleteOne(query)
+      res.send(result);
+    })
+
+
+
+
 
     app.patch('/postedJobs/:id', async(req,res)=>{
       const id = req.params.id;
