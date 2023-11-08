@@ -8,7 +8,10 @@ const port = process.env.PORT || 5000;
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173'
+  origin: [
+    // 'http://localhost:5173'
+    'https://flamefrelacne.web.app',
+    'https://flamefrelacne.firebaseapp.com'
 ],
   credentials:true
 }));
@@ -64,7 +67,7 @@ async function run() {
 
 
 
-    app.post("/addJob", async (req, res) => {
+    app.post("/addJob",verifyToken, async (req, res) => {
       const newJob = req.body;
       const result = await addNewJob.insertOne(newJob);
       res.send(result);
@@ -78,7 +81,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/jobDetails/:id", async (req, res) => {
+    app.get("/jobDetails/:id",verifyToken, async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const query = { _id: new ObjectId(id) };
@@ -86,7 +89,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/postedJobs/:email", async (req, res) => {
+    app.get("/postedJobs/:email",verifyToken, async (req, res) => {
       const email = req.params.email;
       console.log(email);
       const query = { email: email };
@@ -94,7 +97,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/updatePostedJobs/:id", async (req, res) => {
+    app.get("/updatePostedJobs/:id",verifyToken, async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const query = { _id: new ObjectId(id) };
@@ -175,14 +178,14 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/biddedJob/:email",async (req, res)=>{
+    app.get("/biddedJob/:email",verifyToken,async (req, res)=>{
       const email = req.params.email
       const query = {userEmail : email}
       const result = await addBiddedJob.find(query).toArray();
       res.send(result);
     })
 
-    app.get("/biddJobRequests/:email",async (req, res)=>{
+    app.get("/biddJobRequests/:email",verifyToken,async (req, res)=>{
       const email = req.params.email
       console.log(email);
       const query = {employerEmail : email}
