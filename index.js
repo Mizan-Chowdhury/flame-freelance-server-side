@@ -94,11 +94,17 @@ async function run() {
     });
 
     app.delete('/postedJobs/:id', async(req,res)=>{
-      const id = req.params.id
+      const id = req.params.id;
+      const status = req.body.status;
       const query = {
         _id : new ObjectId(id),
       }
-      const result = await addNewJob.deleteOne(query)
+      const updataStatus = {
+        $set:{
+          status : status
+        }
+      }
+      const result = await addBiddedJob.deleteOne(query, updataStatus)
       res.send(result);
     })
 
@@ -106,6 +112,16 @@ async function run() {
       const biddedJob = req.body;
       console.log(biddedJob);
       const result = await addBiddedJob.insertOne(biddedJob);
+      res.send(result);
+    });
+
+    app.patch("/biddedJob/id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = {
+        _id : new ObjectId(id)
+      }
+      const result = await addBiddedJob.updateOne();
       res.send(result);
     });
 
@@ -118,6 +134,7 @@ async function run() {
 
     app.get("/biddJobRequests/:email",async (req, res)=>{
       const email = req.params.email
+      console.log(email);
       const query = {employerEmail : email}
       const result = await addBiddedJob.find(query).toArray();
       res.send(result);
