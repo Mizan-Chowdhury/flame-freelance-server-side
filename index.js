@@ -7,30 +7,33 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 const app = express();
 
-app.use(cors({
-  origin: [
-    // 'http://localhost:5173'
-    'https://flamefrelacne.web.app',
-    'https://flamefrelacne.firebaseapp.com'
-],
-  credentials:true
-}));
+app.use(
+  cors({
+    origin: [
+      // "http://localhost:5173",
+      "https://assigments-de09b.web.app",
+      "https://assigments-de09b.firebaseapp.com",
+    ],
+    credentials: true,
+    optionsSuccessStatus: 200
+  })
+);
 app.use(express.json());
 app.use(cookieParsar());
 
-const verifyToken = (req,res,next)=>{
+const verifyToken = (req, res, next) => {
   const token = req.cookies.token;
-  if(!token){
-    return res.status(401).send({error: 'unAuthorized'})
+  if (!token) {
+    return res.status(401).send({ error: "unAuthorized" });
   }
-  jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded)=>{
-    if(err){
-      return res.status(401).send({error: 'unAuthorized'})
+  jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ error: "unAuthorized" });
     }
-    req.user = decoded
+    req.user = decoded;
     next();
-  })
-}
+  });
+};
 
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@cluster0.qzinma9.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -61,13 +64,10 @@ async function run() {
           httpOnly: true,
           secure: true,
         })
-        .send({success : true});
+        .send({ success: true });
     });
 
-
-
-
-    app.post("/addJob",verifyToken, async (req, res) => {
+    app.post("/addJob", async (req, res) => {
       const newJob = req.body;
       const result = await addNewJob.insertOne(newJob);
       res.send(result);
@@ -81,7 +81,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/jobDetails/:id",verifyToken, async (req, res) => {
+    app.get("/jobDetails/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const query = { _id: new ObjectId(id) };
@@ -89,7 +89,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/postedJobs/:email",verifyToken, async (req, res) => {
+    app.get("/postedJobs/:email", async (req, res) => {
       const email = req.params.email;
       console.log(email);
       const query = { email: email };
@@ -97,7 +97,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/updatePostedJobs/:id",verifyToken, async (req, res) => {
+    app.get("/updatePostedJobs/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const query = { _id: new ObjectId(id) };
@@ -110,9 +110,9 @@ async function run() {
       const updatedJob = req.body;
       const email = req.body.email;
       console.log(updatedJob, id);
-      const filter = { 
+      const filter = {
         _id: new ObjectId(id),
-        email: email
+        email: email,
       };
       const option = { upsert: true };
       const updatedProduct = {
@@ -122,44 +122,36 @@ async function run() {
           category: updatedJob.category,
           min_price: updatedJob.min_price,
           max_price: updatedJob.max_price,
-          description: updatedJob.description
+          description: updatedJob.description,
         },
       };
-      const result = await addNewJob.updateOne(
-        filter,
-        updatedProduct,
-        option
-      );
+      const result = await addNewJob.updateOne(filter, updatedProduct, option);
       res.send(result);
     });
 
-    app.delete('/deleted/:id', async(req, res)=>{
-      const id = req.params.id
+    app.delete("/deleted/:id", async (req, res) => {
+      const id = req.params.id;
       console.log(id);
-      const query = { _id : new ObjectId(id)}
-      const result = await addNewJob.deleteOne(query)
+      const query = { _id: new ObjectId(id) };
+      const result = await addNewJob.deleteOne(query);
       res.send(result);
-    })
+    });
 
-
-
-
-
-    app.patch('/postedJobs/:id', async(req,res)=>{
+    app.patch("/postedJobs/:id", async (req, res) => {
       const id = req.params.id;
       const status = req.body;
       console.log(id, status.status);
       const query = {
-        _id : new ObjectId(id),
-      }
+        _id: new ObjectId(id),
+      };
       const updataStatus = {
-        $set:{
-          status : status.status
-        }
-      }
-      const result = await addBiddedJob.updateOne(query, updataStatus)
+        $set: {
+          status: status.status,
+        },
+      };
+      const result = await addBiddedJob.updateOne(query, updataStatus);
       res.send(result);
-    })
+    });
 
     app.post("/biddedJob", async (req, res) => {
       const biddedJob = req.body;
@@ -172,26 +164,26 @@ async function run() {
       const id = req.params.id;
       console.log(id);
       const query = {
-        _id : new ObjectId(id)
-      }
+        _id: new ObjectId(id),
+      };
       const result = await addBiddedJob.updateOne();
       res.send(result);
     });
 
-    app.get("/biddedJob/:email",verifyToken,async (req, res)=>{
-      const email = req.params.email
-      const query = {userEmail : email}
+    app.get("/biddedJob/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
       const result = await addBiddedJob.find(query).toArray();
       res.send(result);
-    })
+    });
 
-    app.get("/biddJobRequests/:email",verifyToken,async (req, res)=>{
-      const email = req.params.email
+    app.get("/biddJobRequests/:email", async (req, res) => {
+      const email = req.params.email;
       console.log(email);
-      const query = {employerEmail : email}
+      const query = { employerEmail: email };
       const result = await addBiddedJob.find(query).toArray();
       res.send(result);
-    })
+    });
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -208,6 +200,8 @@ run().catch(console.dir);
 app.get("/", (req, res) => {
   res.send("server is running on UI");
 });
+
+
 app.listen(port, (req, res) => {
   console.log("server is running on port: ", port);
 });
