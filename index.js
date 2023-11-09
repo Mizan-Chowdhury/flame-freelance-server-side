@@ -11,8 +11,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://flamefrelacne.web.app",
-      "https://flamefrelacne.firebaseapp.com",
+      "https://assigments-de09b.web.app",
+      "https://assigments-de09b.firebaseapp.com",
     ],
     credentials: true,
     optionsSuccessStatus: 200
@@ -57,14 +57,15 @@ async function run() {
       const user = req.body;
       console.log(user);
       const token = jwt.sign(user, process.env.SECRET_TOKEN, {
-        expiresIn: "20h",
+        expiresIn: "200h",
       });
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: true,
+          secure: false,
+          sameSite: 'none'
         })
-        .send({ success: true });
+        .send({success : true});
     });
 
     app.post("/addJob", async (req, res) => {
