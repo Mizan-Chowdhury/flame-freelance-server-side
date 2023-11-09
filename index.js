@@ -63,10 +63,15 @@ async function run() {
         .cookie("token", token, {
           httpOnly: true,
           secure: false,
-          sameSite: 'none'
         })
-        .send({success : true});
+        .send({success: true});
     });
+
+
+    app.post('/logout', (req, res)=>{
+      const user = req.body
+      res.clearCookie('token',{maxAge:0}).send({success:true})
+    })
 
     app.post("/addJob", async (req, res) => {
       const newJob = req.body;
@@ -84,14 +89,18 @@ async function run() {
 
     app.get("/jobDetails/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await addNewJob.findOne(query);
       res.send(result);
     });
 
-    app.get("/postedJobs/:email", async (req, res) => {
+    app.get("/postedJobs/:email",verifyToken, async (req, res) => {
       const email = req.params.email;
+      const owner = req.user.email;
+      console.log(email, owner);
+      if(email !== owner){
+        return res.status(403).send({message: "forbidden access"})
+      }
       console.log(email);
       const query = { email: email };
       const result = await addNewJob.find(query).toArray();
@@ -171,15 +180,35 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/biddedJob/:email", async (req, res) => {
-      const email = req.params.email;
+
+    app.get("/biddedJob",verifyToken, async (req, res) => {
+      const email = req.query.email;
+      const owner = req.user.email;
+      console.log('user', email);
+      console.log('owner', owner);
+      if(email !== owner){
+        return res.status(403).send({message: "forbidden access"})
+      }
+
+      const asn = req.query.status
+      const filter = {}
+      if(asn){
+        filter.status = asn
+      }
+      console.log(filter)
       const query = { userEmail: email };
-      const result = await addBiddedJob.find(query).toArray();
+      const result = await addBiddedJob.find(query).sort(filter).toArray();
       res.send(result);
     });
 
-    app.get("/biddJobRequests/:email", async (req, res) => {
+    app.get("/biddJobRequests/:email",verifyToken, async (req, res) => {
       const email = req.params.email;
+      const owner = req.user.email;
+      console.log('user', email);
+      console.log('owner', owner);
+      if(email !== owner){
+        return res.status(403).send({message: "forbidden access"})
+      }
       console.log(email);
       const query = { employerEmail: email };
       const result = await addBiddedJob.find(query).toArray();
