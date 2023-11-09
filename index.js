@@ -10,9 +10,9 @@ const app = express();
 app.use(
   cors({
     origin: [
-      // "http://localhost:5173",
-      "https://assigments-de09b.web.app",
-      "https://assigments-de09b.firebaseapp.com",
+      "http://localhost:5173",
+      "https://flamefrelacne.web.app",
+      "https://flamefrelacne.firebaseapp.com",
     ],
     credentials: true,
     optionsSuccessStatus: 200
