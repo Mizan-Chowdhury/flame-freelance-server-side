@@ -10,9 +10,9 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
-      "https://assigments-de09b.web.app",
-      "https://assigments-de09b.firebaseapp.com",
+      "http://localhost:5174",
+      "https://flamefrelacne.web.app",
+      "https://flamefrelacne.firebaseapp.com",
     ],
     credentials: true,
     optionsSuccessStatus: 200
@@ -46,6 +46,10 @@ const client = new MongoClient(uri, {
   },
 });
 
+
+
+
+
 async function run() {
   try {
     const addNewJob = client.db("flameFrelanceDB").collection("addJob");
@@ -55,21 +59,20 @@ async function run() {
 
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      console.log(user);
       const token = jwt.sign(user, process.env.SECRET_TOKEN, {
-        expiresIn: "200h",
+        expiresIn: "2h",
       });
       res
         .cookie("token", token, {
           httpOnly: true,
           secure: true,
+          sameSite: 'none'
         })
         .send({success: true});
     });
 
 
     app.post('/logout', (req, res)=>{
-      const user = req.body
       res.clearCookie('token',{maxAge:0}).send({success:true})
     })
 
